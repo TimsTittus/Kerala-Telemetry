@@ -1,0 +1,32 @@
+import { youtubeVideoIdFromUrl } from "@/lib/youtube";
+
+
+export const youtubeChannels = [
+  { name: "Asianet News", url: "https://www.youtube.com/watch?v=s0LLVQeMmtU" },
+  { name: "Manorama News", url: "https://www.youtube.com/watch?v=tgBTspqA5nY" },
+  { name: "Mathrubhumi News", url: "https://www.youtube.com/watch?v=RbxEftGN584" },
+  { name: "24 News Malayalam", url: "https://www.youtube.com/watch?v=1wECsnGZcfc" },
+  { name: "Reporter TV", url: "https://www.youtube.com/watch?v=nObUcHKZEGY" },
+  { name: "Big TV", url: "https://www.youtube.com/watch?v=HRvY9DoJ_qI" },
+] as const;
+
+export const youtubeStreamEntries = youtubeChannels.map((ch) => {
+  const videoId = youtubeVideoIdFromUrl(ch.url);
+  if (!videoId) throw new Error(`Invalid YouTube URL: ${ch.url}`);
+  return { name: ch.name, url: ch.url, videoId };
+});
+
+
+export const youtubeWatchUrls = youtubeChannels.map((c) => c.url);
+
+
+export const newsRssFeeds = [
+  {
+    name: "The Hindu — Kerala",
+    url: "https://www.thehindu.com/news/national/kerala/feeder/default.rss",
+  },
+  {
+    name: "The New Indian Express — Kerala",
+    url: "https://www.newindianexpress.com/states/kerala/rssfeed/?id=711&getXmlFeed=true",
+  },
+] as const;
