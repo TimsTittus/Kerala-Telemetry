@@ -1,0 +1,242 @@
+"use client";
+
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import type { AqiPayload } from "@/app/api/aqi/route";
+import type { QuakePayload } from "@/app/api/earthquakes/route";
+import { DashboardMiniPanel } from "@/shared/ui/dashboard/DashboardMiniPanel";
+import { DataRefreshButton } from "@/shared/ui/dashboard/DataRefreshButton";
+import { keralaMainCities, openMeteoMultiCityUrl } from "@/config/kerala-cities";
+import { weatherCodeLabel } from "@/lib/weather";
+
+
+function aqiMeta(idx: number | null): { label: string; color: string } {
+  if (idx === null) return { label: "N/A", color: "var(--gf-text-muted)" };
+  if (idx <= 20) return { label: "Good", color: "#22c55e" };
+  if (idx <= 40) return { label: "Fair", color: "#22c55e" };
+  if (idx <= 60) return { label: "Moderate", color: "#22c55e" };
+  if (idx <= 80) return { label: "Poor", color: "#22c55e" };
+  if (idx <= 100) return { label: "Very Poor", color: "#22c55e" };
+  return { label: "Ext. Poor", color: "#22c55e" };
+}
+
+function magColor(mag: number): string {
+  if (mag < 2) return "var(--gf-text-muted)";
+  if (mag < 3) return "var(--gf-live)";
+  if (mag < 4) return "var(--gf-warn)";
+  if (mag < 5) return "#e07b39";
+  return "var(--gf-danger)";
+}
+
+function timeAgo(epochMs: number): string {
+  const diff = Date.now() - epochMs;
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 48) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+function Spinner() {
+  return (
+    <div className="flex items-center justify-center py-6">
+      <div className="kt-spinner" />
+    </div>
+  );
+}
+
+
+
+type WeatherRow = {
+  district: string;
+  temperature: number;
+  weathercode: number;
+  windspeed: number;
+};
+
+export function CityWeatherPanel() {
+  const { data: rows = [], isPending, isFetching, refetch } = useQuery({
+    queryKey: ["panels", "openmeteo-cities-strip"],
+    queryFn: async () => {
+      const json = await fetch(openMeteoMultiCityUrl(), { cache: "no-store" }).then((r) => r.json());
+      const list = Array.isArray(json) ? json : [json];
+      return keralaMainCities.map((c, i) => ({
+        district: c.district,
+        temperature: list[i]?.current_weather?.temperature ?? 0,
+        weathercode: list[i]?.current_weather?.weathercode ?? 0,
+        windspeed: list[i]?.current_weather?.windspeed ?? 0,
+      })) as WeatherRow[];
+    },
+    placeholderData: keepPreviousData,
+    refetchInterval: 10 * 60 * 1000,
+  });
+
+  const liveBadge = (
+    <span className="rounded-sm bg-[var(--gf-live)] px-1.5 py-0.5 font-mono text-[0.55rem] font-bold text-black">
+      LIVE
+    </span>
+  );
+
+  return (
+    <DashboardMiniPanel
+      title="City Weather"
+      badge={liveBadge}
+      id="weather-section"
+      actions={<DataRefreshButton onClick={() => void refetch()} isRefreshing={isPending || isFetching} ariaLabel="Refresh city weather" />}
+    >
+      {isPending ? (
+        <Spinner />
+      ) : (
+        <div className={`divide-y divide-[var(--gf-panel-border)] transition-opacity duration-300 ${isFetching ? "opacity-40" : ""}`}>
+          {rows.map((r) => (
+            <div key={r.district} className="flex h-[52px] items-center justify-between px-3 hover:bg-white/[0.03]">
+              <div className="min-w-0">
+                <div className="truncate text-[0.75rem] font-medium text-[var(--gf-text)]">
+                  {r.district}
+                </div>
+                <div className="font-mono text-[0.6rem] text-[var(--gf-text-muted)]">
+                  {weatherCodeLabel(r.weathercode)} · {r.windspeed} km/h
+                </div>
+              </div>
+              <div className="ml-3 shrink-0 font-mono text-[0.9rem] font-bold text-[var(--gf-text)]">
+                {Math.round(r.temperature)}°C
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </DashboardMiniPanel>
+  );
+}
+
+
+
+export function AirQualityPanel() {
+  const { data, isPending, isFetching, refetch } = useQuery({
+    queryKey: ["panels", "aqi"],
+    queryFn: async () => {
+      const res = await fetch(`/api/aqi?t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(String(res.status));
+      return res.json() as Promise<AqiPayload>;
+    },
+    placeholderData: keepPreviousData,
+    refetchInterval: 10 * 60 * 1000,
+  });
+
+  return (
+    <DashboardMiniPanel
+      title="Air Quality"
+      id="aqi"
+      actions={<DataRefreshButton onClick={() => void refetch()} isRefreshing={isPending || isFetching} ariaLabel="Refresh air quality data" />}
+    >
+      {isPending ? (
+        <Spinner />
+      ) : (
+        <div className={`divide-y divide-[var(--gf-panel-border)] transition-opacity duration-300 ${isFetching ? "opacity-40" : ""}`}>
+          {(data?.cities ?? []).map((c) => {
+            const meta = aqiMeta(c.aqi_index);
+            return (
+              <div key={c.district} className="flex h-[52px] items-center justify-between px-3 hover:bg-white/[0.03]">
+                <div className="min-w-0">
+                  <div className="truncate text-[0.75rem] font-medium text-[var(--gf-text)]">
+                    {c.district}
+                  </div>
+                  {c.pm2_5 !== null && (
+                    <div className="font-mono text-[0.6rem] text-[var(--gf-text-muted)]">
+                      PM2.5 {c.pm2_5.toFixed(1)} µg/m³
+                    </div>
+                  )}
+                </div>
+                <div className="ml-3 flex shrink-0 items-center gap-2">
+                  {c.aqi_index !== null && (
+                    <span className="font-mono text-[0.9rem] font-bold" style={{ color: meta.color }}>
+                      {c.aqi_index}
+                    </span>
+                  )}
+                  <span className="w-16 text-right font-mono text-[0.62rem] font-semibold" style={{ color: meta.color }}>
+                    {meta.label}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </DashboardMiniPanel>
+  );
+}
+
+
+
+export function EarthquakesPanel() {
+  const { data, isPending, isFetching, refetch } = useQuery({
+    queryKey: ["panels", "earthquakes"],
+    queryFn: async () => {
+      const res = await fetch(`/api/earthquakes?t=${Date.now()}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(String(res.status));
+      return res.json() as Promise<QuakePayload>;
+    },
+    placeholderData: keepPreviousData,
+    refetchInterval: 15 * 60 * 1000,
+  });
+
+  const countBadge = data ? (
+    <span className="rounded-sm bg-[var(--gf-warn)]/20 px-1.5 py-0.5 font-mono text-[0.6rem] font-bold text-[var(--gf-warn)]">
+      {data.count}
+    </span>
+  ) : null;
+
+  return (
+    <DashboardMiniPanel
+      title="Earthquakes & Disasters"
+      badge={countBadge}
+      id="earthquakes-dash"
+      actions={<DataRefreshButton onClick={() => void refetch()} isRefreshing={isPending || isFetching} ariaLabel="Refresh earthquake feed" />}
+    >
+      {isPending ? (
+        <Spinner />
+      ) : !data?.quakes.length ? (
+        <div className="px-3 py-4 text-center font-mono text-[0.72rem] text-[var(--gf-text-muted)]">
+          No significant activity in last 30 days
+        </div>
+      ) : (
+        <div className={`divide-y divide-[var(--gf-panel-border)] transition-opacity duration-300 ${isFetching ? "opacity-40" : ""}`}>
+          {data.quakes.slice(0, 20).map((q) => {
+            const color = magColor(q.magnitude);
+            return (
+              <a
+                key={q.id}
+                href={q.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between px-3 py-2 no-underline hover:bg-white/[0.03]"
+                style={{ color: "inherit" }}
+              >
+                <div className="min-w-0 flex-1 pr-2">
+                  <div className="truncate text-[0.72rem] text-[var(--gf-text)]">{q.place}</div>
+                  <div className="font-mono text-[0.6rem] text-[var(--gf-text-muted)]">
+                    {timeAgo(q.time)} · {q.depth.toFixed(0)} km deep
+                  </div>
+                </div>
+                <div className="shrink-0 font-mono text-[1rem] font-bold" style={{ color }}>
+                  M{q.magnitude.toFixed(1)}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </DashboardMiniPanel>
+  );
+}
+
+
+
+export function PrimaryMetricsRow() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <CityWeatherPanel />
+      <AirQualityPanel />
+      <EarthquakesPanel />
+    </div>
+  );
+}
