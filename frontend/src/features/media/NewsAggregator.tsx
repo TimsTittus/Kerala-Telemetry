@@ -1,0 +1,110 @@
+"use client";
+
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { DashboardPanel } from "@/shared/ui/dashboard/DashboardPanel";
+import { DataRefreshButton } from "@/shared/ui/dashboard/DataRefreshButton";
+import type { NewsItemJson } from "@/lib/news";
+
+function formatRelative(isoOrRfc: string | null): string {
+  if (!isoOrRfc) return "";
+  const t = new Date(isoOrRfc).getTime();
+  if (Number.isNaN(t)) return isoOrRfc;
+  const diff = Date.now() - t;
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return "just now";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 48) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+type FeedRef = { name: string; url: string };
+
+type Payload = {
+  items: NewsItemJson[];
+  sources: string;
+  feedUrls: FeedRef[];
+  error: string | null;
+};
+
+const REFRESH_MS = 3 * 60 * 1000;
+
+async function loadNews(): Promise<Payload> {
+  const res = await fetch(`/api/news?limit=30&t=${Date.now()}`, { cache: "no-store" });
+  return (await res.json()) as Payload;
+}
+
+export function NewsAggregator() {
+  const mlHead = "Latest Headlines";
+
+  const { data: payload, isPending, isFetching, refetch } = useQuery({
+    queryKey: ["panels", "news-headlines"],
+    queryFn: loadNews,
+    placeholderData: keepPreviousData,
+    refetchInterval: REFRESH_MS,
+    retry: 1,
+  });
+
+  const refreshBtn = (
+    <DataRefreshButton onClick={() => void refetch()} isRefreshing={isPending || isFetching} ariaLabel="Refresh headlines" />
+  );
+
+  return (
+    <DashboardPanel
+      id="latest-news"
+      title="Latest headlines"
+      subtitle={mlHead}
+      className="kt-animate-in kt-stagger-3 flex max-h-[min(85vh,900px)] scroll-mt-[120px] flex-col"
+      contentClassName="flex min-h-0 flex-1 flex-col !pb-3"
+      rightSlot={refreshBtn}
+    >
+      {isPending && !payload ? (
+        <div className="py-8 text-center text-[0.85rem] text-[var(--gf-text-muted)]">
+          <div className="flex justify-center">
+            <div className="kt-spinner" />
+          </div>
+          <p className="mt-3">
+            {"Loading headlines..."}
+          </p>
+        </div>
+      ) : (
+        <>
+          {payload?.error && (
+            <p className="mb-3 rounded-sm border border-[var(--gf-panel-border)] bg-[var(--gf-panel-inner)] px-3 py-2 text-[0.82rem] text-[var(--gf-text-muted)]">
+              {payload.error}
+            </p>
+          )}
+          {(payload?.items.length ?? 0) === 0 && !payload?.error && (
+            <p className="text-[0.85rem] text-[var(--gf-text-muted)]">No stories returned.</p>
+          )}
+          <ul className={`min-h-0 flex-1 space-y-1 overflow-y-auto pr-1 transition-opacity duration-300 ${isFetching ? "opacity-40" : ""}`}>
+            {(payload?.items ?? []).map((item) => (
+              <li key={item.link}>
+                <a
+                  href={item.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="kt-card-hover gf-subpanel flex gap-3 p-3 no-underline"
+                  style={{ color: "inherit" }}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="font-mono text-[0.6rem] font-semibold tracking-wider text-[var(--gf-text-muted)] uppercase">
+                      {item.source}
+                    </div>
+                    <div className="mt-1 line-clamp-2 text-[0.86rem] leading-snug text-[var(--gf-text)]">
+                      {item.title}
+                    </div>
+                    <div className="mt-1 font-mono text-[0.62rem] text-[var(--gf-text-muted)]">
+                      {item.pubDate ? formatRelative(item.pubDate) : ""}
+                    </div>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </DashboardPanel>
+  );
+}
