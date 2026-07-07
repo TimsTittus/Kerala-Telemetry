@@ -39,6 +39,28 @@
   --foreground: var(--gf-text);
 }
 
+.light {
+  --gf-page: #f2f2f2;
+  --gf-panel-bg: rgba(255, 255, 255, 0.6);
+  --gf-panel-inner: rgba(255, 255, 255, 0.4);
+  --gf-panel-border: rgba(0, 0, 0, 0.12);
+  --gf-header-bar: rgba(240, 240, 240, 0.85);
+  --gf-nav-bg: rgba(255, 255, 255, 0.7);
+
+  --gf-text: #111111;
+  --gf-text-muted: #555555;
+
+  --gf-accent: #000000;
+  --gf-accent-soft: rgba(0, 0, 0, 0.1);
+  --gf-live: #000000;
+  --gf-warn: #555555;
+  --gf-danger: #333333;
+  --gf-ticker-bg: rgba(255, 255, 255, 0.9);
+
+  --color-white: #000000;
+  --color-black: #ffffff;
+}
+
 @theme inline {
   --color-background: var(--gf-page);
   --color-foreground: var(--gf-text);
@@ -53,12 +75,16 @@ html {
   background-color: var(--gf-page);
 }
 
+html.light {
+  color-scheme: light;
+}
+
 body {
   background-color: var(--gf-page);
-  
+
   background-image:
-    radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.03), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.04), transparent 25%);
+    radial-gradient(circle at 15% 50%, var(--gf-accent-soft), transparent 25%),
+    radial-gradient(circle at 85% 30%, var(--gf-accent-soft), transparent 25%);
   color: var(--gf-text);
   overflow-x: hidden;
 }
@@ -112,7 +138,7 @@ summary:focus-visible {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--gf-panel-border);
   border-radius: 12px;
-  
+
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
@@ -378,7 +404,7 @@ summary:focus-visible {
   font-size: 11px;
   font-weight: 500;
   color: var(--gf-text);
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--gf-header-bar);
 }
 
 .leaflet-control-zoom a {
