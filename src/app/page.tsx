@@ -85,12 +85,15 @@ function daysUntilLabel(dateStr: string): string | null {
 export default async function Home() {
   const { festivalItems, movieItems, upcomingMovieItems } = await loadFestivalsAndMovies();
 
+  const nowShowingItems = movieItems.filter(item => movieBadgeLabel(item, "now") === "Showtime");
+  const streamingItems = movieItems.filter(item => movieBadgeLabel(item, "now") === "OTT");
+
   const mlFest = "Upcoming Celebrations";
   const mlMovies = "Malayalam Movies";
 
   return (
     <div className="min-h-full bg-black relative">
-      {}
+      { }
       <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent pointer-events-none" />
 
       <div className="gf-top-stripe relative z-10" aria-hidden />
@@ -108,25 +111,25 @@ export default async function Home() {
           <NewsAggregator />
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 items-start">
-            {}
+            { }
             <AirQualityPanel />
 
-            {}
+            { }
             <CityWeatherPanel />
 
-            {}
+            { }
             <EarthquakesPanel />
 
-            {}
+            { }
             <ExchangeRatesPanel />
 
-            {}
+            { }
             <FuelPanel />
 
-            {}
+            { }
             <IndianMarketsPanel />
 
-            {}
+            { }
             <div className="md:col-span-2 xl:col-span-3">
               <DashboardPanel
                 id="movies"
@@ -195,13 +198,16 @@ export default async function Home() {
                         </div>
                       </div>
                     ) : null}
-                    {movieItems.length > 0 ? (
-                      <div className="pt-2">
+                    {[
+                      { title: "Now showing", items: nowShowingItems },
+                      { title: "Streaming", items: streamingItems }
+                    ].map((section, idx) => section.items.length > 0 ? (
+                      <div key={section.title} className={idx > 0 || upcomingMovieItems.length > 0 ? "pt-2" : ""}>
                         <h3 className="mb-3 font-mono text-[0.68rem] font-semibold tracking-wider text-[var(--gf-text-muted)] uppercase">
-                          Now showing &amp; streaming
+                          {section.title}
                         </h3>
                         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                          {movieItems.map((item, i) => {
+                          {section.items.map((item, i) => {
                             const badge = movieBadgeLabel(item, "now");
                             const isOtt = badge === "OTT";
                             return (
@@ -247,16 +253,16 @@ export default async function Home() {
                           })}
                         </div>
                       </div>
-                    ) : null}
+                    ) : null)}
                   </div>
                 )}
               </DashboardPanel>
             </div>
 
-            {}
+            { }
             <SeismicPanel />
 
-            {}
+            { }
             <div className="md:col-span-2 xl:col-span-3">
               <DashboardPanel
                 id="festivals"
