@@ -168,11 +168,11 @@ export default async function Home() {
                                     <img
                                       src={item.poster}
                                       alt={item.title}
-                                      className="h-full w-full object-cover grayscale opacity-90 transition-all hover:grayscale-0"
+                                      className="h-full w-full object-cover opacity-90 transition-all hover:opacity-100"
                                       loading="lazy"
                                     />
                                   ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-4xl grayscale opacity-50">
+                                    <div className="flex h-full w-full items-center justify-center text-4xl opacity-50">
                                       {["\u{1F3AC}", "\u{1F39E}\uFE0F", "\u{1F3AD}", "\u{1F3DE}\uFE0F"][i % 4]}
                                     </div>
                                   )}
@@ -220,11 +220,11 @@ export default async function Home() {
                                     <img
                                       src={item.poster}
                                       alt={item.title}
-                                      className="h-full w-full object-cover grayscale opacity-90 transition-all hover:grayscale-0"
+                                      className="h-full w-full object-cover opacity-90 transition-all hover:opacity-100"
                                       loading="lazy"
                                     />
                                   ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-4xl grayscale opacity-50">
+                                    <div className="flex h-full w-full items-center justify-center text-4xl opacity-50">
                                       {["\u{1F3AC}", "\u{1F39E}\uFE0F", "\u{1F3AD}", "\u{1F3DE}\uFE0F"][i % 4]}
                                     </div>
                                   )}

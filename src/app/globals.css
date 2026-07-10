@@ -14,8 +14,10 @@
   --gf-text-muted: #888888;
 
   --gf-accent: #ffffff;
+  --gf-accent-fg: #000000;
   --gf-accent-soft: rgba(255, 255, 255, 0.1);
   --gf-live: #ffffff;
+  --gf-live-fg: #000000;
   --gf-warn: #a3a3a3;
   --gf-danger: #d4d4d4;
   --gf-ticker-bg: rgba(20, 20, 20, 0.8);
@@ -51,8 +53,10 @@
   --gf-text-muted: #555555;
 
   --gf-accent: #000000;
+  --gf-accent-fg: #ffffff;
   --gf-accent-soft: rgba(0, 0, 0, 0.1);
   --gf-live: #000000;
+  --gf-live-fg: #ffffff;
   --gf-warn: #555555;
   --gf-danger: #333333;
   --gf-ticker-bg: rgba(255, 255, 255, 0.9);
@@ -188,7 +192,7 @@ summary:focus-visible {
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.05em;
-  color: #000000;
+  color: var(--gf-live-fg);
   background: var(--gf-live);
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }

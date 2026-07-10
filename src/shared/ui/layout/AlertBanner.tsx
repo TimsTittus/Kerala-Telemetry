@@ -7,7 +7,7 @@ type NewsPayload = { items: NewsItem[]; error: string | null };
 
 const FALLBACK = "Kerala Telemetry — live news, weather, markets and more";
 
-const REFRESH_MS = 5 * 60 * 1000; 
+const REFRESH_MS = 5 * 60 * 1000;
 
 function buildTickerText(items: NewsItem[]): string {
   if (!items.length) return FALLBACK;
@@ -32,12 +32,12 @@ export function AlertBanner() {
         if (cancelled) return;
         if (json.items?.length) {
           setTickerText(buildTickerText(json.items));
-          
+
           const alertWords = /alert|warning|flood|cyclone|landslide|earthquake|red|orange|yellow/i;
           setHasAlert(json.items.some((i) => alertWords.test(i.title)));
         }
       } catch {
-        
+
       }
     }
 
@@ -57,7 +57,7 @@ export function AlertBanner() {
       style={{ background: "var(--gf-ticker-bg)" }}
     >
       <span
-        className="shrink-0 rounded-sm px-1.5 py-0.5 text-[0.58rem] font-bold tracking-wider text-[#0b0f14]"
+        className="shrink-0 rounded-sm px-1.5 py-0.5 text-[0.58rem] font-bold tracking-wider text-[color:var(--gf-accent-fg)]"
         style={{ background: hasAlert ? "var(--gf-danger)" : "var(--gf-accent)" }}
       >
         {hasAlert ? "BREAKING" : "LATEST"}
