@@ -9,6 +9,7 @@ import { AirQualityPanel, CityWeatherPanel, EarthquakesPanel } from "@/features/
 import { ExchangeRatesPanel, FuelPanel, IndianMarketsPanel, SeismicPanel } from "@/features/markets/SecondaryMetricsRow";
 import { RegionalMapOverviewLoader } from "@/features/telemetry/RegionalMapOverviewLoader";
 import { NewsAggregator } from "@/features/media/NewsAggregator";
+import { SportsAggregator } from "@/features/media/SportsAggregator";
 import { LiveBroadcasts } from "@/features/media/LiveBroadcasts";
 import { youtubeStreamEntries } from "@/config/sources";
 
@@ -257,6 +258,11 @@ export default async function Home() {
                   </div>
                 )}
               </DashboardPanel>
+            </div>
+
+            { }
+            <div className="md:col-span-2 xl:col-span-3">
+              <SportsAggregator />
             </div>
 
             { }
