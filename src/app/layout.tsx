@@ -7,6 +7,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { QueryProviders } from "@/shared/QueryProviders";
+import Script from "next/script";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -56,6 +57,23 @@ export default function RootLayout({
         style={{ backgroundColor: "#0b0f14", color: "#d8dee9" }}
       >
         <QueryProviders>{children}</QueryProviders>
+
+        <Script id="google-translate-init" strategy="beforeInteractive">
+          {`
+            window.googleTranslateElementInit = function() {
+              new window.google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,ml',
+                autoDisplay: false,
+                layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+              }, 'google_translate_element');
+            }
+          `}
+        </Script>
+        <Script
+          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

@@ -423,3 +423,13 @@ summary:focus-visible {
 .leaflet-control-attribution {
   display: none !important;
 }
+
+/* Hide Google Translate Top Bar */
+.skiptranslate>iframe.skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body {
+  top: 0 !important;
+}

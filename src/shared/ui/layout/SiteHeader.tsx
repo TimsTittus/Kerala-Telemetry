@@ -76,6 +76,18 @@ export function SiteHeader() {
     }
   };
 
+  const toggleLanguage = () => {
+    const isMl = document.cookie.includes("googtrans=/en/ml");
+    if (isMl) {
+      document.cookie = "googtrans=/en/en; path=/";
+      document.cookie = `googtrans=/en/en; domain=${window.location.hostname}; path=/`;
+    } else {
+      document.cookie = "googtrans=/en/ml; path=/";
+      document.cookie = `googtrans=/en/ml; domain=${window.location.hostname}; path=/`;
+    }
+    window.location.reload();
+  };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setNow(new Date());
@@ -150,6 +162,23 @@ export function SiteHeader() {
               {timeStr}
             </span>
           </div>
+
+          <div id="google_translate_element" className="absolute opacity-0 pointer-events-none -z-50" />
+
+          <button
+            onClick={toggleLanguage}
+            aria-label="Toggle Language"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 8 6 6" />
+              <path d="m4 14 6-6 2-3" />
+              <path d="M2 5h12" />
+              <path d="M7 2h1" />
+              <path d="m22 22-5-10-5 10" />
+              <path d="M14 18h6" />
+            </svg>
+          </button>
 
           <button
             onClick={toggleTheme}
